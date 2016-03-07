@@ -23,8 +23,8 @@ type (
 		group string
 	}
 
-	// CreateVolumeArgs represents the json parameters for the create volume REST call
-	CreateVolumeArgs struct {
+	// CreateVolumeReq represents the json parameters for the create volume REST call
+	CreateVolumeReq struct {
 		ConsistencyGroup string `json:"consistency_group"`
 		Count            int    `json:"count"`
 		Name             string `json:"name"`
@@ -34,8 +34,8 @@ type (
 		VPool            string `json:"vpool"`
 	}
 
-	// CreateVolumeReply is the reply from the create volume REST call
-	CreateVolumeReply struct {
+	// CreateVolumeRes is the reply from the create volume REST call
+	CreateVolumeRes struct {
 		Task []struct {
 			Resource struct {
 				Name string `json:"name"`
@@ -46,7 +46,7 @@ type (
 
 	VolumeId string
 
-	ListVolumesResponse struct {
+	ListVolumesRes struct {
 		Volumes []VolumeId `json:"id"`
 	}
 )
@@ -84,7 +84,7 @@ func (this *VolumeService) Create(name string, size int64) (string, error) {
 
 func (this *VolumeService) List() ([]VolumeId, error) {
 
-	res := ListVolumesResponse{}
+	res := ListVolumesResp{}
 
 	err := this.Get(ListVolumesUri, nil, &res)
 	if err != nil {
