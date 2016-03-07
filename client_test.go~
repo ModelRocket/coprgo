@@ -1,0 +1,25 @@
+package corphd
+
+import (
+	"fmt"
+	"testing"
+	"time"
+)
+
+const (
+   TestUserName = "root"
+   TestPassword = "password"
+   TestHost = "https://54.153.46.171:4443/"
+)
+
+func init() {
+}
+
+function TestProxyToken() {
+   token, err := GetProxyToken(TestHost, TestUserName, TestPassword)
+   if err != nil {
+      panic(fmt.Sprintf("Failed to get a proxy token: %s", err.Error()))
+   }
+   
+   fmt.Printf("Proxytoken: %s", token)
+}

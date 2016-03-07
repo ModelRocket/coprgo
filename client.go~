@@ -1,0 +1,29 @@
+package coprhd
+
+import (
+	"crypto/tls"
+	"gopkg.in/jmcvetta/napping.v3"
+	"net/http"
+)
+
+type (
+	Client struct {
+	}
+)
+
+var (
+	// httpClient is a runtime initialized client that ignores certificate errors
+	httpClient *http.Client
+)
+
+func init() {
+	httpClient = &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+	}
+}
+
+func NewClient(host string, username string, password string) (*Client, error) {
+
+}
