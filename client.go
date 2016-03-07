@@ -119,11 +119,29 @@ func (this *Client) Get(r string, p *url.Values, result interface{}) error {
 	if err != nil {
 		return err
 	}
+	if e.Code > 0 {
+		return errors.New(e.Description + ":" + e.Details)
+	}
 	if resp.Status() >= http.StatusBadRequest {
 		return errors.New(http.StatusText(resp.Status()))
 	}
+
+	return nil
+}
+
+func (this *Client) Post(r string, p, result interface{}) error {
+	e := ApiError{}
+	path := this.PathForResource(r)
+	resp, err := this.s.Post(path, p, result, &e)
+
+	if err != nil {
+		return err
+	}
 	if e.Code > 0 {
-		return errors.New(e.Description)
+		return errors.New(e.Description + ":" + e.Details)
+	}
+	if resp.Status() >= http.StatusBadRequest {
+		return errors.New(http.StatusText(resp.Status()))
 	}
 
 	return nil
