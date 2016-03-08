@@ -1,11 +1,13 @@
 package coprhd
 
 import (
+	"fmt"
 	"time"
 )
 
 const (
-	CreateExportUri = "block/exports.json"
+	CreateExportUri    = "block/exports.json"
+	DeleteExportUriTpl = "block/exports/%s/deactivate.json"
 
 	ExportTypeExclusive = "Exclusive"
 )
@@ -98,4 +100,17 @@ func (this *ExportService) Create(name string) (string, error) {
 	err = this.Task().WaitDone(task.Id, TaskStateReady, time.Second*180)
 
 	return task.Resource.Id, err
+}
+
+func (this *ExportService) Delete(id string) error {
+	path := fmt.Sprintf(DeleteExportUriTpl, id)
+
+	task := Task{}
+
+	err := this.Post(path, nil, &task)
+	if err != nil {
+		return err
+	}
+
+	return this.Task().WaitDone(task.Id, TaskStateReady, time.Second*180)
 }

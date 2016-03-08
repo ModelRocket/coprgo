@@ -21,6 +21,7 @@ const (
 var (
 	proxyToken string
 	testVolume string
+	testExport string
 )
 
 func TestProxyToken(t *testing.T) {
@@ -78,9 +79,20 @@ func TestExportVolume(t *testing.T) {
 	}
 
 	fmt.Printf("Created export group %s\n", group)
+
+	testExport = group
 }
 
-/*
+func TestExportDelete(t *testing.T) {
+	client := NewClient(TestHost, proxyToken)
+	err := client.Export().
+		Delete(testExport)
+
+	if err != nil {
+		t.Fatal("Failed to delete export:", err.Error())
+	}
+}
+
 func TestDeleteVolume(t *testing.T) {
 	client := NewClient(TestHost, proxyToken)
 	err := client.Volume().
@@ -90,4 +102,4 @@ func TestDeleteVolume(t *testing.T) {
 	if err != nil {
 		t.Fatal("Failed to delete volume:", err.Error())
 	}
-}*/
+}
