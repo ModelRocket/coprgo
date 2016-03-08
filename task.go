@@ -25,23 +25,20 @@ type (
 	}
 
 	Task struct {
-		Name        string    `json:"name"`
-		Id          string    `json:"id"`
-		State       TaskState `json:"state"`
-		Message     string    `json:"message"`
-		Description string    `json:"description"`
-		Progress    int       `json:"progress"`
-		Resource    struct {
-			Name string `json:"name"`
-			Id   string `json:"id"`
-		} `json:"resource"`
+		Name        string        `json:"name"`
+		Id          string        `json:"id"`
+		State       TaskState     `json:"state"`
+		Message     string        `json:"message"`
+		Description string        `json:"description"`
+		Progress    int           `json:"progress"`
+		Resource    NamedResource `json:"resource"`
 	}
 
 	TaskState string
 )
 
 func (this *Client) Task() *TaskService {
-	return &TaskService{this}
+	return &TaskService{this.Copy()}
 }
 
 // Query returns the task object

@@ -32,13 +32,16 @@ type (
 
 		// proxyToken is the token used for authentication
 		proxyToken string
+
+		// lastError is the last API error to occur on the service
+		lastError ApiError
 	}
 
 	ApiError struct {
-		Code        int    `xml:"code"`
-		Retryable   bool   `xml:"retryable"`
-		Description string `xml:"description"`
-		Details     string `xml:"details"`
+		Code        int    `json:"code"`
+		Retryable   bool   `json:"retryable"`
+		Description string `json:"description"`
+		Details     string `json:"details"`
 	}
 )
 
@@ -56,6 +59,7 @@ func NewClient(host string, token string) *Client {
 		newAuthSession(token),
 		host,
 		token,
+		ApiError{},
 	}
 }
 
@@ -107,11 +111,16 @@ func GetProxyToken(host string, username string, password string) (string, error
 	return token, nil
 }
 
+func (this *Client) Copy() *Client {
+	return &Client{this.s, this.host, this.proxyToken, ApiError{}}
+}
+
 func (this *Client) PathForResource(r string) string {
 	return buildUrl(this.host, r)
 }
 
 func (this *Client) Get(r string, p *url.Values, result interface{}) error {
+	this.lastError = ApiError{}
 	e := ApiError{}
 	path := this.PathForResource(r)
 	resp, err := this.s.Get(path, p, result, &e)
@@ -120,6 +129,7 @@ func (this *Client) Get(r string, p *url.Values, result interface{}) error {
 		return err
 	}
 	if e.Code > 0 {
+		this.lastError = e
 		return errors.New(e.Description + ":" + e.Details)
 	}
 	if resp.Status() >= http.StatusBadRequest {
@@ -130,6 +140,7 @@ func (this *Client) Get(r string, p *url.Values, result interface{}) error {
 }
 
 func (this *Client) Post(r string, p, result interface{}) error {
+	this.lastError = ApiError{}
 	e := ApiError{}
 	path := this.PathForResource(r)
 	resp, err := this.s.Post(path, p, result, &e)
@@ -138,6 +149,7 @@ func (this *Client) Post(r string, p, result interface{}) error {
 		return err
 	}
 	if e.Code > 0 {
+		this.lastError = e
 		return errors.New(e.Description + ":" + e.Details)
 	}
 	if resp.Status() >= http.StatusBadRequest {
@@ -145,6 +157,10 @@ func (this *Client) Post(r string, p, result interface{}) error {
 	}
 
 	return nil
+}
+
+func (this *Client) LastError() ApiError {
+	return this.lastError
 }
 
 func buildUrl(host string, path string) string {

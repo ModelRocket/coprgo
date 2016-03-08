@@ -7,9 +7,11 @@ import (
 )
 
 const (
-	CreateVolumeUri = "block/volumes.json"
-	ListVolumesUri  = "block/volumes/bulk.json"
-	DeleteVolUrlTpl = "block/volumes/%s/deactivate.json"
+	CreateVolumeUri   = "block/volumes.json"
+	QueryVolumeUriTpl = "block/volumes/%s.json"
+	SearchVolumeUri   = "block/volumes/search.json?"
+	ListVolumesUri    = "block/volumes/bulk.json"
+	DeleteVolUrlTpl   = "block/volumes/%s/deactivate.json"
 )
 
 var (
@@ -17,23 +19,35 @@ var (
 )
 
 type (
+	// VolumeService is used to create, search, and query for volumes
 	VolumeService struct {
 		*Client
-
-		// id is the volume id
-		id string
-
-		// project is the project for the volume command
+		id      string
+		array   string
+		pool    string
+		group   string
 		project string
+	}
 
-		// varray is the Virtual Array for the volume command
-		array string
-
-		// vpool is the Virtual Pool for the volume command
-		pool string
-
-		// group is the consistency group id for the command
-		group string
+	// Volume is a complete coprhd volume object
+	Volume struct {
+		BaseObject          `json:",inline"`
+		WWN                 string      `json:"wwn"`
+		Protocols           []string    `json:"protocols"`
+		Protection          interface{} `json:"protection"`
+		ConsistencyGroup    string      `json:"consistency_group,omitempty"`
+		StorageController   string      `json:"storage_controller"`
+		DeviceLabel         string      `json:"device_label"`
+		NativeId            string      `json:"native_id"`
+		ProvisionedCapacity string      `json:"provisioned_capacity_gb"`
+		AllocatedCapacity   string      `json:"allocated_capacity_gb"`
+		RequestedCapacity   string      `json:"requested_capacity_gb"`
+		PreAllocationSize   string      `json:"pre_allocation_size_gb"`
+		IsComposite         bool        `json:"is_composite"`
+		ThinlyProvisioned   bool        `json:"thinly_provisioned"`
+		HABackingVolumes    []string    `json:"high_availability_backing_volumes"`
+		AccessState         string      `json:"access_state"`
+		StoragePool         Resource    `json:"storage_pool"`
 	}
 
 	// CreateVolumeReq represents the json parameters for the create volume REST call
@@ -52,16 +66,15 @@ type (
 		Task []Task `json:"task"`
 	}
 
-	VolumeId string
-
+	// ListVolumesRes is the reply to geting a list of volumes
 	ListVolumesRes struct {
-		Volumes []VolumeId `json:"id"`
+		Volumes []string `json:"id"`
 	}
 )
 
 func (this *Client) Volume() *VolumeService {
 	return &VolumeService{
-		Client: this,
+		Client: this.Copy(),
 	}
 }
 
@@ -91,7 +104,7 @@ func (this *VolumeService) Project(project string) *VolumeService {
 }
 
 // CreateVolume creates a new volume with the specified name using the volume service
-func (this *VolumeService) Create(name string, size int64) (string, error) {
+func (this *VolumeService) Create(name string, size int64) (*Volume, error) {
 	sz := float64(size / (1024 * 1024 * 1000))
 
 	req := CreateVolumeReq{
@@ -111,22 +124,56 @@ func (this *VolumeService) Create(name string, size int64) (string, error) {
 
 	err := this.Post(CreateVolumeUri, &req, &res)
 	if err != nil {
-		return "", err
+		if this.LastError().IsCreateVolDup() {
+			fmt.Printf("its a dup\n")
+			return this.Search("name=" + name)
+		}
+		return nil, err
 	}
 
 	if len(res.Task) != 1 {
-		return "", ErrCreateResponse
+		return nil, ErrCreateResponse
 	}
 
 	task := res.Task[0]
+
+	// wait for the task to complete
+	err = this.Task().WaitDone(task.Id, TaskStateReady, time.Second*180)
+	if err != nil {
+		return nil, err
+	}
+
 	this.id = task.Resource.Id
 
-	err = this.Task().WaitDone(task.Id, TaskStateReady, time.Second*180)
-
-	return this.id, err
+	return this.Query()
 }
 
-func (this *VolumeService) List() ([]VolumeId, error) {
+func (this *VolumeService) Query() (*Volume, error) {
+	path := fmt.Sprintf(QueryVolumeUriTpl, this.id)
+	vol := Volume{}
+
+	err := this.Get(path, nil, &vol)
+	if err != nil {
+		return nil, err
+	}
+
+	return &vol, nil
+}
+
+func (this *VolumeService) Search(query string) (*Volume, error) {
+	path := SearchVolumeUri + query
+
+	res, err := this.Client.Search(path)
+	if err != nil {
+		return nil, err
+	}
+
+	this.id = res[0].Id
+
+	return this.Query()
+}
+
+func (this *VolumeService) List() ([]string, error) {
 
 	res := ListVolumesRes{}
 
@@ -144,5 +191,12 @@ func (this *VolumeService) Delete(force bool) error {
 		path = path + "?force=true"
 	}
 
-	return this.Post(path, nil, nil)
+	task := Task{}
+
+	err := this.Post(path, nil, &task)
+	if err != nil {
+		return err
+	}
+
+	return this.Task().WaitDone(task.Id, TaskStateReady, time.Second*180)
 }
