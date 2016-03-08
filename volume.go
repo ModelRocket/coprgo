@@ -3,6 +3,7 @@ package coprhd
 import (
 	"errors"
 	"fmt"
+	"time"
 )
 
 const (
@@ -120,7 +121,7 @@ func (this *VolumeService) Create(name string, size int64) (string, error) {
 	task := res.Task[0]
 	this.id = task.Resource.Id
 
-	err = this.Task().WaitDone(task.Id, TaskStateReady)
+	err = this.Task().WaitDone(task.Id, TaskStateReady, time.Second*180)
 
 	return this.id, err
 }

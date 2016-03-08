@@ -15,6 +15,10 @@ const (
 	TaskStateReady   TaskState = "ready"
 )
 
+var (
+	ErrTaskWaitTimeout = errors.New("WaitDone timeout")
+)
+
 type (
 	TaskService struct {
 		*Client
@@ -40,6 +44,7 @@ func (this *Client) Task() *TaskService {
 	return &TaskService{this}
 }
 
+// Query returns the task object
 func (this *TaskService) Query(id string) (Task, error) {
 	path := fmt.Sprintf(GetTaskUriTpl, id)
 	task := Task{}
@@ -49,8 +54,10 @@ func (this *TaskService) Query(id string) (Task, error) {
 	return task, err
 }
 
-// WaitDone does a busy poll to wait for a task to complete
-func (this *TaskService) WaitDone(id string, state TaskState) error {
+// WaitDone does a busy poll to wait for a task to reach the specified state with the timeout
+func (this *TaskService) WaitDone(id string, state TaskState, to time.Duration) error {
+	end := time.Now().Add(to)
+
 	for {
 		task, err := this.Query(id)
 		if err != nil {
@@ -65,6 +72,9 @@ func (this *TaskService) WaitDone(id string, state TaskState) error {
 			break
 		}
 
+		if time.Now().After(end) {
+			return ErrTaskWaitTimeout
+		}
 		time.Sleep(TaskPollDelay)
 	}
 

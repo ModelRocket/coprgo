@@ -1,6 +1,8 @@
 package coprhd
 
-import ()
+import (
+	"time"
+)
 
 const (
 	CreateExportUri = "block/exports.json"
@@ -38,6 +40,7 @@ type (
 	ExportType string
 )
 
+// Export gets an instance to the ExportService
 func (this *Client) Export() *ExportService {
 	return &ExportService{
 		Client:     this,
@@ -74,6 +77,7 @@ func (this *ExportService) Type(t ExportType) *ExportService {
 	return this
 }
 
+// Create creates and export with the specfied name
 func (this *ExportService) Create(name string) (string, error) {
 	req := CreateExportReq{
 		Name:       name,
@@ -91,7 +95,7 @@ func (this *ExportService) Create(name string) (string, error) {
 		return "", err
 	}
 
-	err = this.Task().WaitDone(task.Id, TaskStateReady)
+	err = this.Task().WaitDone(task.Id, TaskStateReady, time.Second*180)
 
 	return task.Resource.Id, err
 }
