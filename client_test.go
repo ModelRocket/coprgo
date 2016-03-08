@@ -114,8 +114,23 @@ func TestQueryHost(t *testing.T) {
 		Query()
 
 	if err != nil {
-		t.Fatal("Failed to delete volume:", err.Error())
+		t.Fatal("Failed to query host", err.Error())
 	}
 
 	fmt.Printf("Got host %s [%s]\n", host.Id, host.Name)
+}
+
+func TestQueryHostInitiators(t *testing.T) {
+	client := NewClient(TestHost, proxyToken)
+	itrs, err := client.Host().
+		Id(TestHostId).
+		Initiators()
+
+	if err != nil {
+		t.Fatal("Failed to query host initiators:", err.Error())
+	}
+
+	if len(itrs) > 0 {
+		fmt.Printf("Got %d initiators => %s\n", len(itrs), itrs[0].Port)
+	}
 }

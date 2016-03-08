@@ -6,10 +6,10 @@ import (
 )
 
 const (
-	CreateHostUri       = "compute/hosts.json"
-	CreateHostItrUriTpl = "compute/hosts/%s/initiators.json"
-	SearchHostUri       = "compute/hosts/search.json"
-	QueryHostUriTpl     = "compute/hosts/%s.json"
+	CreateHostUri      = "compute/hosts.json"
+	QueryHostItrUriTpl = "compute/hosts/%s/initiators.json"
+	SearchHostUri      = "compute/hosts/search.json"
+	QueryHostUriTpl    = "compute/hosts/%s.json"
 
 	HostTypeLinux   HostType = "Linux"
 	HostTypeWindows HostType = "Windows"
@@ -52,6 +52,10 @@ type (
 		Discoverable bool     `json:"discoverable"`
 		Username     string   `json:"user_name"`
 		Password     string   `json:"password"`
+	}
+
+	QueryHostItrRes struct {
+		Initiators []NamedResource `json:"initiator"`
 	}
 
 	HostType string
@@ -185,4 +189,29 @@ func (this *HostService) Delete(id string) error {
 	}
 
 	return this.Task().WaitDone(task.Id, TaskStateReady, time.Second*180)
+}
+
+func (this *HostService) Initiators() ([]Initiator, error) {
+	path := fmt.Sprintf(QueryHostItrUriTpl, this.id)
+	res := QueryHostItrRes{}
+	itrs := make([]Initiator, 0)
+
+	err := this.Get(path, nil, &res)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, i := range res.Initiators {
+		itr, err := this.Initiator().
+			Id(i.Id).
+			Query()
+
+		if err != nil {
+			return itrs, err
+		}
+
+		itrs = append(itrs, *itr)
+	}
+
+	return itrs, nil
 }

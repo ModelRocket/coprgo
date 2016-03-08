@@ -46,7 +46,7 @@ func (this *InitiatorService) Id(id string) *InitiatorService {
 }
 
 func (this *InitiatorService) Query() (*Initiator, error) {
-	path := fmt.Sprintf(QueryVolumeUriTpl, this.id)
+	path := fmt.Sprintf(InitiatorQueryUriTpl, this.id)
 	itr := Initiator{}
 
 	err := this.Get(path, nil, &itr)
@@ -59,7 +59,7 @@ func (this *InitiatorService) Query() (*Initiator, error) {
 
 func (this *InitiatorService) Search(query string) (*Initiator, error) {
 
-	path := SearchVolumeUri + query
+	path := InitiatorSearchUri + query
 
 	res, err := this.Client.Search(path)
 	if err != nil {
