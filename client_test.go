@@ -14,6 +14,8 @@ const (
 	TestPool       = "urn:storageos:VirtualPool:f943f75a-d610-4cea-9319-26f03c924e85:vdc1"
 	TestVolumeName = "test_00"
 	TestVolumeSize = 1024 * 1024 * 1024
+
+	TestInitiator = "urn:storageos:Initiator:ce8672c8-3396-4757-b004-6592b80c5838:vdc1"
 )
 
 var (
@@ -62,6 +64,23 @@ func TestCreateVolume(t *testing.T) {
 	testVolume = id
 }
 
+func TestExportVolume(t *testing.T) {
+	client := NewClient(TestHost, proxyToken)
+	group, err := client.Export().
+		Initiators(TestInitiator).
+		Volumes(testVolume).
+		Project(TestProject).
+		Array(TestArray).
+		Create(TestVolumeName)
+
+	if err != nil {
+		t.Fatal("Failed to export volume:", err.Error())
+	}
+
+	fmt.Printf("Created export group %s\n", group)
+}
+
+/*
 func TestDeleteVolume(t *testing.T) {
 	client := NewClient(TestHost, proxyToken)
 	err := client.Volume().
@@ -71,4 +90,4 @@ func TestDeleteVolume(t *testing.T) {
 	if err != nil {
 		t.Fatal("Failed to delete volume:", err.Error())
 	}
-}
+}*/

@@ -8,7 +8,7 @@ import (
 const (
 	CreateVolumeUri = "block/volumes.json"
 	ListVolumesUri  = "block/volumes/bulk.json"
-	DeleteVolUrlTpl = "block/volumes/%s/deactivate"
+	DeleteVolUrlTpl = "block/volumes/%s/deactivate.json"
 )
 
 var (
@@ -17,7 +17,6 @@ var (
 
 type (
 	VolumeService struct {
-		// client is a pointer to the coprhd client
 		*Client
 
 		// id is the volume id
@@ -49,12 +48,7 @@ type (
 
 	// CreateVolumeRes is the reply from the create volume REST call
 	CreateVolumeRes struct {
-		Task []struct {
-			Resource struct {
-				Name string `json:"name"`
-				Id   string `json:"id"`
-			} `json:"resource"`
-		} `json:"task"`
+		Task []Task `json:"task"`
 	}
 
 	VolumeId string
@@ -123,7 +117,12 @@ func (this *VolumeService) Create(name string, size int64) (string, error) {
 		return "", ErrCreateResponse
 	}
 
-	return res.Task[0].Resource.Id, nil
+	task := res.Task[0]
+	this.id = task.Resource.Id
+
+	err = this.Task().WaitDone(task.Id, TaskStateReady)
+
+	return this.id, err
 }
 
 func (this *VolumeService) List() ([]VolumeId, error) {
