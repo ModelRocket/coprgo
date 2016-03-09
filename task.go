@@ -53,7 +53,8 @@ func (this *TaskService) Query(id string) (Task, error) {
 
 // WaitDone does a busy poll to wait for a task to reach the specified state with the timeout
 func (this *TaskService) WaitDone(id string, state TaskState, to time.Duration) error {
-	end := time.Now().Add(to)
+	timeout := time.After(to)
+	timer := time.Tick(TaskPollDelay)
 
 	for {
 		task, err := this.Query(id)
@@ -66,14 +67,13 @@ func (this *TaskService) WaitDone(id string, state TaskState, to time.Duration) 
 		}
 
 		if task.State == state {
-			break
+			return nil
 		}
 
-		if time.Now().After(end) {
+		select {
+		case <-timer:
+		case <-timeout:
 			return ErrTaskWaitTimeout
 		}
-		time.Sleep(TaskPollDelay)
 	}
-
-	return nil
 }
