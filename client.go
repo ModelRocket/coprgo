@@ -54,6 +54,8 @@ func init() {
 }
 
 // NewClient returns a new coprhd rest api client using the specified proxy token
+// The proxy token can be generated programmatically using the GetProxyToken method
+// or better using the `coprtop` tool
 func NewClient(host string, token string) *Client {
 	return &Client{
 		newAuthSession(token),
@@ -111,14 +113,17 @@ func GetProxyToken(host string, username string, password string) (string, error
 	return token, nil
 }
 
+// Copy creates a clone of the client
 func (this *Client) Copy() *Client {
 	return &Client{this.s, this.host, this.proxyToken, ApiError{}}
 }
 
+// PathForResource is a helper method that returns the complete url for a resource
 func (this *Client) PathForResource(r string) string {
 	return buildUrl(this.host, r)
 }
 
+// Get performs an http GET using the underlying http client
 func (this *Client) Get(r string, p *url.Values, result interface{}) error {
 	this.lastError = ApiError{}
 	e := ApiError{}
@@ -139,6 +144,7 @@ func (this *Client) Get(r string, p *url.Values, result interface{}) error {
 	return nil
 }
 
+// Post performs an http POST using the underlying http client
 func (this *Client) Post(r string, p, result interface{}) error {
 	this.lastError = ApiError{}
 	e := ApiError{}
@@ -159,6 +165,8 @@ func (this *Client) Post(r string, p, result interface{}) error {
 	return nil
 }
 
+// LastError return the last ApiError
+// If a method returns an error object, you can check this to get more specific details
 func (this *Client) LastError() ApiError {
 	return this.lastError
 }

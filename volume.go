@@ -73,33 +73,39 @@ type (
 	}
 )
 
+// Volume returns an instance of the VolumeService
 func (this *Client) Volume() *VolumeService {
 	return &VolumeService{
 		Client: this.Copy(),
 	}
 }
 
+// Id sets the volume id urn for the VolumeService instance
 func (this *VolumeService) Id(id string) *VolumeService {
 	// make sure Volume is capitalized
 	this.id = strings.Replace(id, "volume", "Volume", 1)
 	return this
 }
 
+// Array sets the varray urn for the VolumeService instance
 func (this *VolumeService) Array(array string) *VolumeService {
 	this.array = array
 	return this
 }
 
+// Pool sets the vpool urn for the VolumeService instance
 func (this *VolumeService) Pool(pool string) *VolumeService {
 	this.pool = pool
 	return this
 }
 
+// Group sets the consistency group urn for the VolumeService instance
 func (this *VolumeService) Group(group string) *VolumeService {
 	this.group = group
 	return this
 }
 
+// Project sets the project urn for the VolumeService instance
 func (this *VolumeService) Project(project string) *VolumeService {
 	this.project = project
 	return this
@@ -149,6 +155,7 @@ func (this *VolumeService) Create(name string, size uint64) (*Volume, error) {
 	return this.Query()
 }
 
+// Query returns the volume object using the specified id
 func (this *VolumeService) Query() (*Volume, error) {
 	path := fmt.Sprintf(QueryVolumeUriTpl, this.id)
 	vol := Volume{}
@@ -161,6 +168,10 @@ func (this *VolumeService) Query() (*Volume, error) {
 	return &vol, nil
 }
 
+// Search searches for a volume using the specified query string
+// For example:
+//    Search("name=foo")
+//
 func (this *VolumeService) Search(query string) (*Volume, error) {
 	path := SearchVolumeUri + query
 
