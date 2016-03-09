@@ -126,6 +126,9 @@ func (this *VolumeService) Create(name string, size uint64) (*Volume, error) {
 
 	err := this.Post(CreateVolumeUri, &req, &res)
 	if err != nil {
+		if this.LastError().IsCreateVolDup() {
+			return this.Search("name=" + name)
+		}
 		return nil, err
 	}
 
