@@ -13,7 +13,8 @@ type (
 	VPoolService struct {
 		*Client
 
-		id string
+		id   string
+		name string
 	}
 
 	VPool struct {
@@ -33,7 +34,16 @@ func (this *VPoolService) Id(id string) *VPoolService {
 	return this
 }
 
+func (this *VPoolService) Name(name string) *VPoolService {
+	this.name = name
+	return this
+}
+
 func (this *VPoolService) Query() (*VPool, error) {
+	if !isStorageOsUrn(this.id) {
+		return this.Search("name=" + this.name)
+	}
+
 	path := fmt.Sprintf(VPoolQueryUriTpl, this.id)
 	v := VPool{}
 

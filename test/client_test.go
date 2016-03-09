@@ -10,15 +10,14 @@ const (
 	TestUserName   = "root"
 	TestPassword   = "@ChangeMe1"
 	TestHost       = "https://54.153.46.171:4443/"
-	TestProject    = "urn:storageos:Project:2dd5e0b5-4434-405a-8c5a-828daad17b3a:global"
-	TestArray      = "urn:storageos:VirtualArray:7245ed6d-a4b9-4adf-9caa-901767586e1c:vdc1"
-	TestPool       = "urn:storageos:VirtualPool:f943f75a-d610-4cea-9319-26f03c924e85:vdc1"
-	TestTenant     = "urn:storageos:TenantOrg:6284485a-af0d-4575-8ef9-7efbe0beefb1:global"
+	TestProject    = "default"
+	TestArray      = "default"
+	TestPool       = "default"
 	TestVolumeName = "test_00"
 	TestVolumeSize = 1024 * 1024 * 1024
 
-	TestHostId    = "urn:storageos:Host:fbc1e1a8-d8af-4123-9843-14459016927a:vdc1"
-	TestInitiator = "urn:storageos:Initiator:ce8672c8-3396-4757-b004-6592b80c5838:vdc1"
+	TestHostName  = "Test Host"
+	TestInitiator = "iqn.1994-05.com.redhat:98d5cd397a18"
 )
 
 var (
@@ -54,11 +53,12 @@ func TestEnumVolumes(t *testing.T) {
 func TestCreateVolume(t *testing.T) {
 	client := NewClient(TestHost, proxyToken)
 	vs := client.Volume().
+		Name(TestVolumeName).
 		Project(TestProject).
 		Array(TestArray).
 		Pool(TestPool)
 
-	vol, err := vs.Create(TestVolumeName, TestVolumeSize)
+	vol, err := vs.Create(TestVolumeSize)
 	if err != nil {
 		t.Fatal("Failed to create volume:", err.Error())
 	}
@@ -71,12 +71,13 @@ func TestCreateVolume(t *testing.T) {
 func TestExportVolume(t *testing.T) {
 	client := NewClient(TestHost, proxyToken)
 	es := client.Export().
+		Name(TestVolumeName).
 		Initiators(TestInitiator).
 		Volumes(testVolume).
 		Project(TestProject).
 		Array(TestArray)
 
-	export, err := es.Create(TestVolumeName)
+	export, err := es.Create()
 
 	if err != nil {
 		t.Fatal("Failed to export volume:", err.Error())
@@ -111,7 +112,7 @@ func TestDeleteVolume(t *testing.T) {
 func TestQueryHost(t *testing.T) {
 	client := NewClient(TestHost, proxyToken)
 	host, err := client.Host().
-		Id(TestHostId).
+		Name(TestHostName).
 		Query()
 
 	if err != nil {
@@ -124,7 +125,7 @@ func TestQueryHost(t *testing.T) {
 func TestQueryHostInitiators(t *testing.T) {
 	client := NewClient(TestHost, proxyToken)
 	itrs, err := client.Host().
-		Id(TestHostId).
+		Name(TestHostName).
 		Initiators()
 
 	if err != nil {

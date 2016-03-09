@@ -13,7 +13,8 @@ type (
 	VArrayService struct {
 		*Client
 
-		id string
+		id   string
+		name string
 	}
 
 	VArrayBlockSettings struct {
@@ -44,7 +45,16 @@ func (this *VArrayService) Id(id string) *VArrayService {
 	return this
 }
 
+func (this *VArrayService) Name(name string) *VArrayService {
+	this.name = name
+	return this
+}
+
 func (this *VArrayService) Query() (*VArray, error) {
+	if !isStorageOsUrn(this.id) {
+		return this.Search("name=" + this.name)
+	}
+
 	path := fmt.Sprintf(VArrayQueryUriTpl, this.id)
 	v := VArray{}
 

@@ -24,6 +24,7 @@ type (
 	VolumeService struct {
 		*Client
 		id      string
+		name    string
 		array   string
 		pool    string
 		group   string
@@ -87,6 +88,12 @@ func (this *VolumeService) Id(id string) *VolumeService {
 	return this
 }
 
+// Name sets the volume name for the VolumeService instance
+func (this *VolumeService) Name(name string) *VolumeService {
+	this.name = name
+	return this
+}
+
 // Array sets the varray urn for the VolumeService instance
 func (this *VolumeService) Array(array string) *VolumeService {
 	this.array = array
@@ -112,12 +119,16 @@ func (this *VolumeService) Project(project string) *VolumeService {
 }
 
 // CreateVolume creates a new volume with the specified name using the volume service
-func (this *VolumeService) Create(name string, size uint64) (*Volume, error) {
+func (this *VolumeService) Create(size uint64) (*Volume, error) {
 	sz := float64(size / (1024 * 1024 * 1000))
+
+	if err := this.getVolumeUrns(); err != nil {
+		return nil, err
+	}
 
 	req := CreateVolumeReq{
 		Count:   1,
-		Name:    name,
+		Name:    this.name,
 		Project: this.project,
 		VArray:  this.array,
 		VPool:   this.pool,
@@ -133,7 +144,7 @@ func (this *VolumeService) Create(name string, size uint64) (*Volume, error) {
 	err := this.Post(CreateVolumeUri, &req, &res)
 	if err != nil {
 		if this.LastError().IsCreateVolDup() {
-			return this.Search("name=" + name)
+			return this.Query()
 		}
 		return nil, err
 	}
@@ -157,6 +168,10 @@ func (this *VolumeService) Create(name string, size uint64) (*Volume, error) {
 
 // Query returns the volume object using the specified id
 func (this *VolumeService) Query() (*Volume, error) {
+	if !isStorageOsUrn(this.id) {
+		return this.Search("name=" + this.name)
+	}
+
 	path := fmt.Sprintf(QueryVolumeUriTpl, this.id)
 	vol := Volume{}
 
@@ -211,4 +226,53 @@ func (this *VolumeService) Delete(force bool) error {
 	}
 
 	return this.Task().WaitDone(task.Id, TaskStateReady, time.Second*180)
+}
+
+func (this *VolumeService) getVolumeUrns() error {
+
+	// lookup the project by name
+	if !isStorageOsUrn(this.project) {
+		project, err := this.Client.Project().
+			Name(this.project).
+			Query()
+		if err != nil {
+			return err
+		}
+		this.project = project.Id
+	}
+
+	// lookup the array by name
+	if !isStorageOsUrn(this.array) {
+		array, err := this.Client.VArray().
+			Name(this.array).
+			Query()
+		if err != nil {
+			return err
+		}
+		this.array = array.Id
+	}
+
+	// lookup the pool by name
+	if !isStorageOsUrn(this.pool) {
+		pool, err := this.Client.VPool().
+			Name(this.pool).
+			Query()
+		if err != nil {
+			return err
+		}
+		this.pool = pool.Id
+	}
+
+	// lookup the group by name
+	if this.group != "" && !isStorageOsUrn(this.group) {
+		group, err := this.Client.Group().
+			Name(this.group).
+			Query()
+		if err != nil {
+			return err
+		}
+		this.group = group.Id
+	}
+
+	return nil
 }

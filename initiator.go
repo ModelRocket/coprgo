@@ -45,7 +45,16 @@ func (this *InitiatorService) Id(id string) *InitiatorService {
 	return this
 }
 
+func (this *InitiatorService) Port(port string) *InitiatorService {
+	this.port = port
+	return this
+}
+
 func (this *InitiatorService) Query() (*Initiator, error) {
+	if !isStorageOsUrn(this.id) {
+		return this.Search("initiator_port=" + this.port)
+	}
+
 	path := fmt.Sprintf(InitiatorQueryUriTpl, this.id)
 	itr := Initiator{}
 

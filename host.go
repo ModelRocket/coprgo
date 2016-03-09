@@ -22,6 +22,7 @@ type (
 	HostService struct {
 		*Client
 		id     string
+		name   string
 		typ    HostType
 		os     string
 		tenant string
@@ -72,6 +73,11 @@ func (this *HostService) Id(id string) *HostService {
 	return this
 }
 
+func (this *HostService) Name(name string) *HostService {
+	this.name = name
+	return this
+}
+
 func (this *HostService) Tenant(id string) *HostService {
 	this.tenant = id
 	return this
@@ -88,9 +94,9 @@ func (this *HostService) OSVersion(v string) *HostService {
 }
 
 // Create creates a new host with the name and host
-func (this *HostService) Create(name, host string) (*Host, error) {
+func (this *HostService) Create(host string) (*Host, error) {
 	req := CreateHostReq{
-		Name:         name,
+		Name:         this.name,
 		HostName:     host,
 		Discoverable: false,
 		Type:         this.typ,
@@ -103,7 +109,7 @@ func (this *HostService) Create(name, host string) (*Host, error) {
 	err := this.Post(CreateHostUri, &req, &task)
 	if err != nil {
 		if this.LastError().IsCreateHostDup() {
-			return this.Search("name=" + name)
+			return this.Query()
 		}
 		return nil, err
 	}
@@ -119,9 +125,9 @@ func (this *HostService) Create(name, host string) (*Host, error) {
 }
 
 // Discover creates and attempts to discover a new host
-func (this *HostService) Discover(name, host, username, password string, port int, ssl bool) (*Host, error) {
+func (this *HostService) Discover(host, username, password string, port int, ssl bool) (*Host, error) {
 	req := CreateHostReq{
-		Name:         name,
+		Name:         this.name,
 		HostName:     host,
 		Port:         port,
 		Discoverable: true,
@@ -138,7 +144,7 @@ func (this *HostService) Discover(name, host, username, password string, port in
 	err := this.Post(CreateHostUri, &req, &task)
 	if err != nil {
 		if this.LastError().IsCreateHostDup() {
-			return this.Search("name=" + name)
+			return this.Query()
 		}
 		return nil, err
 	}
@@ -154,6 +160,10 @@ func (this *HostService) Discover(name, host, username, password string, port in
 }
 
 func (this *HostService) Query() (*Host, error) {
+	if !isStorageOsUrn(this.id) {
+		return this.Search("name=" + this.name)
+	}
+
 	path := fmt.Sprintf(QueryHostUriTpl, this.id)
 	host := Host{}
 
@@ -192,6 +202,10 @@ func (this *HostService) Delete(id string) error {
 }
 
 func (this *HostService) Initiators() ([]Initiator, error) {
+	if err := this.queryHostByName(); err != nil {
+		return nil, err
+	}
+
 	path := fmt.Sprintf(QueryHostItrUriTpl, this.id)
 	res := QueryHostItrRes{}
 	itrs := make([]Initiator, 0)
@@ -214,4 +228,16 @@ func (this *HostService) Initiators() ([]Initiator, error) {
 	}
 
 	return itrs, nil
+}
+
+func (this *HostService) queryHostByName() error {
+	if !isStorageOsUrn(this.id) {
+		host, err := this.Query()
+		if err != nil {
+			return err
+		}
+		this.id = host.Id
+		this.name = host.Name
+	}
+	return nil
 }

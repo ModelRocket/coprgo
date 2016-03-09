@@ -13,7 +13,8 @@ type (
 	ProjectService struct {
 		*Client
 
-		id string
+		id   string
+		name string
 	}
 
 	Project struct {
@@ -32,7 +33,16 @@ func (this *ProjectService) Id(id string) *ProjectService {
 	return this
 }
 
+func (this *ProjectService) Name(name string) *ProjectService {
+	this.name = name
+	return this
+}
+
 func (this *ProjectService) Query() (*Project, error) {
+	if !isStorageOsUrn(this.id) {
+		return this.Search("name=" + this.name)
+	}
+
 	path := fmt.Sprintf(ProjectQueryUriTpl, this.id)
 	proj := Project{}
 

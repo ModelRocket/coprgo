@@ -18,6 +18,7 @@ type (
 	ExportService struct {
 		*Client
 		id         string
+		name       string
 		itrs       []string
 		project    string
 		exportType ExportType
@@ -57,8 +58,15 @@ func (this *Client) Export() *ExportService {
 	}
 }
 
+// Id sets the id urn for the export group, use for query, ignored for create
 func (this *ExportService) Id(id string) *ExportService {
 	this.id = id
+	return this
+}
+
+// Name sets the name for the export group
+func (this *ExportService) Name(name string) *ExportService {
+	this.name = name
 	return this
 }
 
@@ -90,9 +98,14 @@ func (this *ExportService) Type(t ExportType) *ExportService {
 }
 
 // Create creates and export with the specfied name
-func (this *ExportService) Create(name string) (*Export, error) {
+func (this *ExportService) Create() (*Export, error) {
+
+	if err := this.getExportUrns(); err != nil {
+		return nil, err
+	}
+
 	req := CreateExportReq{
-		Name:       name,
+		Name:       this.name,
 		Initiators: this.itrs,
 		Project:    this.project,
 		Type:       this.exportType,
@@ -105,7 +118,7 @@ func (this *ExportService) Create(name string) (*Export, error) {
 	err := this.Post(CreateExportUri, &req, &task)
 	if err != nil {
 		if this.LastError().IsExportVolDup() {
-			return this.Search("name=" + name)
+			return this.Query()
 		}
 		return nil, err
 	}
@@ -123,6 +136,10 @@ func (this *ExportService) Create(name string) (*Export, error) {
 }
 
 func (this *ExportService) Query() (*Export, error) {
+	if !isStorageOsUrn(this.id) {
+		return this.Search("name=" + this.name)
+	}
+
 	path := fmt.Sprintf(QueryExportUriTpl, this.id)
 	exp := Export{}
 
@@ -158,4 +175,62 @@ func (this *ExportService) Delete(id string) error {
 	}
 
 	return this.Task().WaitDone(task.Id, TaskStateReady, time.Second*180)
+}
+
+func (this *ExportService) getExportUrns() error {
+	// lookup the project by name
+	if !isStorageOsUrn(this.project) {
+		project, err := this.Client.Project().
+			Name(this.project).
+			Query()
+		if err != nil {
+			return err
+		}
+		this.project = project.Id
+	}
+
+	// lookup the array by name
+	if !isStorageOsUrn(this.array) {
+		array, err := this.Client.VArray().
+			Name(this.array).
+			Query()
+		if err != nil {
+			return err
+		}
+		this.array = array.Id
+	}
+
+	// Lookup the intiators
+	itrs := []string{}
+	for _, i := range this.itrs {
+		if !isStorageOsUrn(i) {
+			itr, err := this.Client.Initiator().
+				Port(i).
+				Query()
+			if err != nil {
+				return err
+			}
+			i = itr.Id
+		}
+		itrs = append(itrs, i)
+	}
+	this.itrs = itrs
+
+	// Look up the volumes
+	vols := []ResourceId{}
+	for _, v := range this.volumes {
+		if !isStorageOsUrn(v.Id) {
+			vol, err := this.Client.Volume().
+				Name(v.Id).
+				Query()
+			if err != nil {
+				return err
+			}
+			v.Id = vol.Id
+		}
+		vols = append(vols, v)
+	}
+	this.volumes = vols
+
+	return nil
 }

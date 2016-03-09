@@ -191,3 +191,7 @@ func newAuthSession(token string) *napping.Session {
 		Header: &h,
 	}
 }
+
+func isStorageOsUrn(name string) bool {
+	return strings.HasPrefix(name, "urn:storageos:")
+}
