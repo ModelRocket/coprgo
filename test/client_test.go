@@ -1,7 +1,8 @@
-package coprhd
+package test
 
 import (
 	"fmt"
+	. "github.com/ModelRocket/coprhd"
 	"testing"
 )
 
