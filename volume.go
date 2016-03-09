@@ -104,7 +104,7 @@ func (this *VolumeService) Project(project string) *VolumeService {
 }
 
 // CreateVolume creates a new volume with the specified name using the volume service
-func (this *VolumeService) Create(name string, size int64) (*Volume, error) {
+func (this *VolumeService) Create(name string, size uint64) (*Volume, error) {
 	sz := float64(size / (1024 * 1024 * 1000))
 
 	req := CreateVolumeReq{

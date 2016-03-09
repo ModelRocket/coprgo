@@ -8,7 +8,7 @@ import (
 const (
 	CreateHostUri      = "compute/hosts.json"
 	QueryHostItrUriTpl = "compute/hosts/%s/initiators.json"
-	SearchHostUri      = "compute/hosts/search.json"
+	SearchHostUri      = "compute/hosts/search.json?"
 	QueryHostUriTpl    = "compute/hosts/%s.json"
 
 	HostTypeLinux   HostType = "Linux"

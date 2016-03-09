@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	InitiatorSearchUri   = "compute/initiators/search.json"
+	InitiatorSearchUri   = "compute/initiators/search.json?"
 	InitiatorQueryUriTpl = "compute/initiators/%s.json"
 
 	InitiatorTypeISCSI InitiatorType = "iSCSI"
