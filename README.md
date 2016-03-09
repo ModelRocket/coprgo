@@ -31,6 +31,13 @@ func main() {
 	for i, vol := range vols {
 		fmt.Printf("Volume %d: %s\n", i, vol)
 	}
+
+	// Query a volume by urn
+	vol, _ := client.Volume().
+		Id(urn).  // or by Name(name)
+		Query()
+
+	fmt.Printf("Volume name %s\n", vol.Name)
 }
 ```
 
