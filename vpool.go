@@ -18,7 +18,7 @@ type (
 
 	VPool struct {
 		BaseObject `json:",inline"`
-		Protocols  []string `json:"protocols"`
+		Protocols  []InitiatorType `json:"protocols"`
 	}
 )
 
@@ -56,4 +56,17 @@ func (this *VPoolService) Search(query string) (*VPool, error) {
 	this.id = res[0].Id
 
 	return this.Query()
+}
+
+func (this *VPool) IsBlock() bool {
+	return this.Type == "block"
+}
+
+func (this *VPool) HasProtocol(p InitiatorType) bool {
+	for _, t := range this.Protocols {
+		if t == p {
+			return true
+		}
+	}
+	return false
 }
