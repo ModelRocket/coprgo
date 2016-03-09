@@ -31,7 +31,6 @@ type (
 		Initiators    []Initiator     `json:"initiators"`
 		Hosts         []NamedResource `json:"hosts"`
 		Clustsers     []NamedResource `json:"clusters"`
-		Type          string          `json:"type"`
 		GeneratedName string          `json:"generated_name"`
 		PathParams    []string        `json:"path_params"`
 	}

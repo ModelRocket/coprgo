@@ -32,5 +32,7 @@ type (
 		Tenant        Resource `json:"tenant,omitempty"`
 		CreationTime  int64    `json:"creation_time"`
 		VArray        Resource `json:"varray,omitempty"`
+		Owner         string   `json:"owner,omitempty"`
+		Type          string   `json:"type,omitempty"`
 	}
 )
