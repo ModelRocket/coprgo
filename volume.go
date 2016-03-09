@@ -3,6 +3,7 @@ package coprhd
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -11,7 +12,7 @@ const (
 	QueryVolumeUriTpl = "block/volumes/%s.json"
 	SearchVolumeUri   = "block/volumes/search.json?"
 	ListVolumesUri    = "block/volumes/bulk.json"
-	DeleteVolUrlTpl   = "block/volumes/%s/deactivate.json"
+	DeleteVolUriTpl   = "block/volumes/%s/deactivate.json"
 )
 
 var (
@@ -79,7 +80,8 @@ func (this *Client) Volume() *VolumeService {
 }
 
 func (this *VolumeService) Id(id string) *VolumeService {
-	this.id = id
+	// make sure Volume is capitalized
+	this.id = strings.Replace(id, "volume", "Volume", 1)
 	return this
 }
 
@@ -181,7 +183,7 @@ func (this *VolumeService) List() ([]string, error) {
 }
 
 func (this *VolumeService) Delete(force bool) error {
-	path := fmt.Sprintf(DeleteVolUrlTpl, this.id)
+	path := fmt.Sprintf(DeleteVolUriTpl, this.id)
 
 	if force {
 		path = path + "?force=true"
