@@ -19,8 +19,10 @@ const (
 )
 
 type (
+	// HostService provides host creation and querying
 	HostService struct {
 		*Client
+
 		id     string
 		name   string
 		typ    HostType
@@ -28,6 +30,7 @@ type (
 		tenant string
 	}
 
+	// Host represents a physical host resource
 	Host struct {
 		StorageObject      `json:",inline"`
 		Type               HostType `json:"type"`
@@ -42,7 +45,10 @@ type (
 		Cluster            Resource `json:"cluster,omitempty"`
 	}
 
-	CreateHostReq struct {
+	// HostType is a string type for the host
+	HostType string
+
+	createHostReq struct {
 		Name         string   `json:"name"`
 		Type         HostType `json:"type"`
 		OSVersion    string   `json:"os_version,omitempty"`
@@ -58,36 +64,40 @@ type (
 	queryHostItrRes struct {
 		Initiators []NamedResource `json:"initiator"`
 	}
-
-	HostType string
 )
 
+// Host returns an instance of the HostService
 func (this *Client) Host() *HostService {
 	return &HostService{
 		Client: this.Copy(),
 	}
 }
 
+// Id sets the id for the host query
 func (this *HostService) Id(id string) *HostService {
 	this.id = id
 	return this
 }
 
+// Name sets the name for the host creation or query
 func (this *HostService) Name(name string) *HostService {
 	this.name = name
 	return this
 }
 
+// Tenant sets the tenant id for the creation
 func (this *HostService) Tenant(id string) *HostService {
 	this.tenant = id
 	return this
 }
 
+// Type sets the HostType for the creation
 func (this *HostService) Type(t HostType) *HostService {
 	this.typ = t
 	return this
 }
 
+// OSVersion sets the os version string for the creation
 func (this *HostService) OSVersion(v string) *HostService {
 	this.os = v
 	return this
@@ -95,7 +105,7 @@ func (this *HostService) OSVersion(v string) *HostService {
 
 // Create creates a new host with the name and host
 func (this *HostService) Create(host string) (*Host, error) {
-	req := CreateHostReq{
+	req := createHostReq{
 		Name:         this.name,
 		HostName:     host,
 		Discoverable: false,
@@ -126,7 +136,7 @@ func (this *HostService) Create(host string) (*Host, error) {
 
 // Discover creates and attempts to discover a new host
 func (this *HostService) Discover(host, username, password string, port int, ssl bool) (*Host, error) {
-	req := CreateHostReq{
+	req := createHostReq{
 		Name:         this.name,
 		HostName:     host,
 		Port:         port,
@@ -159,6 +169,7 @@ func (this *HostService) Discover(host, username, password string, port int, ssl
 	return this.Query()
 }
 
+// Query locates a Host record by id or name
 func (this *HostService) Query() (*Host, error) {
 	if !isStorageOsUrn(this.id) {
 		return this.Search("name=" + this.name)
@@ -175,6 +186,7 @@ func (this *HostService) Query() (*Host, error) {
 	return &host, nil
 }
 
+// Search performs a search for the host using the query string
 func (this *HostService) Search(query string) (*Host, error) {
 	path := searchHostUri + query
 
@@ -188,6 +200,7 @@ func (this *HostService) Search(query string) (*Host, error) {
 	return this.Query()
 }
 
+// Initiators returns a slice of Initiator objects for the host
 func (this *HostService) Initiators() ([]Initiator, error) {
 	if err := this.queryHostByName(); err != nil {
 		return nil, err

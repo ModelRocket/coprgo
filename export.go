@@ -15,6 +15,7 @@ const (
 )
 
 type (
+	// ExportService provices a means for querying or creating volume export groups
 	ExportService struct {
 		*Client
 		id         string
@@ -26,6 +27,7 @@ type (
 		volumes    []ResourceId
 	}
 
+	// Export represents a storage export group
 	Export struct {
 		StorageObject `json:",inline"`
 		Volumes       []ResourceId    `json:"volumes"`
@@ -36,6 +38,9 @@ type (
 		PathParams    []string        `json:"path_params"`
 	}
 
+	// ExportType is a string value of the export type
+	ExportType string
+
 	createExportReq struct {
 		Initiators []string     `json:"initiators"`
 		Name       string       `json:"name"`
@@ -44,8 +49,6 @@ type (
 		VArray     string       `json:"varray"`
 		Volumes    []ResourceId `json:"volumes"`
 	}
-
-	ExportType string
 )
 
 // Export gets an instance to the ExportService

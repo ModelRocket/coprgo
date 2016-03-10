@@ -16,6 +16,7 @@ const (
 )
 
 var (
+	// ErrCreateResponse is returned when the api call returns an unexptected result
 	ErrCreateResponse = errors.New("Invalid create response received")
 )
 
@@ -118,7 +119,7 @@ func (this *VolumeService) Project(project string) *VolumeService {
 	return this
 }
 
-// createVolume creates a new volume with the specified name using the volume service
+// Create creates a new volume with the specified name and size using the volume service
 func (this *VolumeService) Create(size uint64) (*Volume, error) {
 	sz := float64(size / (1024 * 1024 * 1000))
 
@@ -211,6 +212,7 @@ func (this *VolumeService) List() ([]string, error) {
 	return res.Volumes, nil
 }
 
+// Delete deactivates the volume using the volume service
 func (this *VolumeService) Delete(force bool) error {
 	path := fmt.Sprintf(deleteVolumeUriTpl, this.id)
 
