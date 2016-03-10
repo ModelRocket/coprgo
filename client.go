@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	LoginUri      = "login"
-	ProxyTokenUri = "proxytoken"
+	loginUri      = "login"
+	proxyTokenUri = "proxytoken"
 )
 
 var (
@@ -76,7 +76,7 @@ func GetProxyToken(host string, username string, password string) (string, error
 		Client:   httpClient,
 	}
 
-	path := buildUrl(host, LoginUri)
+	path := buildUrl(host, loginUri)
 
 	resp, err := s.Get(path, nil, nil, &e)
 	if err != nil {
@@ -92,7 +92,7 @@ func GetProxyToken(host string, username string, password string) (string, error
 	// this is the temporary login auth token
 	token := resp.HttpResponse().Header.Get("X-SDS-AUTH-TOKEN")
 
-	path = buildUrl(host, ProxyTokenUri)
+	path = buildUrl(host, proxyTokenUri)
 
 	s = newAuthSession(token)
 

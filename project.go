@@ -5,8 +5,8 @@ import (
 )
 
 const (
-	ProjectQueryUriTpl = "projects/%s.json"
-	ProjectSearchUri   = "projects/search.json?"
+	queryProjectUriTpl = "projects/%s.json"
+	searchProjectUri   = "projects/search.json?"
 )
 
 type (
@@ -43,7 +43,7 @@ func (this *ProjectService) Query() (*Project, error) {
 		return this.Search("name=" + this.name)
 	}
 
-	path := fmt.Sprintf(ProjectQueryUriTpl, this.id)
+	path := fmt.Sprintf(queryProjectUriTpl, this.id)
 	proj := Project{}
 
 	err := this.get(path, nil, &proj)
@@ -55,7 +55,7 @@ func (this *ProjectService) Query() (*Project, error) {
 }
 
 func (this *ProjectService) Search(query string) (*Project, error) {
-	path := ProjectSearchUri + query
+	path := searchProjectUri + query
 
 	res, err := this.Client.Search(path)
 	if err != nil {

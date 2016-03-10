@@ -5,8 +5,8 @@ import (
 )
 
 const (
-	VPoolQueryUriTpl = "block/vpools/%s.json"
-	VPoolSearchUri   = "block/vpools/search.json?"
+	queryVPoolUriTpl = "block/vpools/%s.json"
+	searchVPoolUri   = "block/vpools/search.json?"
 )
 
 type (
@@ -44,7 +44,7 @@ func (this *VPoolService) Query() (*VPool, error) {
 		return this.Search("name=" + this.name)
 	}
 
-	path := fmt.Sprintf(VPoolQueryUriTpl, this.id)
+	path := fmt.Sprintf(queryVPoolUriTpl, this.id)
 	v := VPool{}
 
 	err := this.get(path, nil, &v)
@@ -56,7 +56,7 @@ func (this *VPoolService) Query() (*VPool, error) {
 }
 
 func (this *VPoolService) Search(query string) (*VPool, error) {
-	path := VPoolSearchUri + query
+	path := searchVPoolUri + query
 
 	res, err := this.Client.Search(path)
 	if err != nil {

@@ -5,8 +5,8 @@ import (
 )
 
 const (
-	VArrayQueryUriTpl = "vdc/varrays/%s.json"
-	VArraySearchUri   = "vdc/varrays/search.json?"
+	queryVArrayUriTpl = "vdc/varrays/%s.json"
+	searchVArrayUri   = "vdc/varrays/search.json?"
 )
 
 type (
@@ -55,7 +55,7 @@ func (this *VArrayService) Query() (*VArray, error) {
 		return this.Search("name=" + this.name)
 	}
 
-	path := fmt.Sprintf(VArrayQueryUriTpl, this.id)
+	path := fmt.Sprintf(queryVArrayUriTpl, this.id)
 	v := VArray{}
 
 	err := this.get(path, nil, &v)
@@ -67,7 +67,7 @@ func (this *VArrayService) Query() (*VArray, error) {
 }
 
 func (this *VArrayService) Search(query string) (*VArray, error) {
-	path := VArraySearchUri + query
+	path := searchVArrayUri + query
 
 	res, err := this.Client.Search(path)
 	if err != nil {

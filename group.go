@@ -5,8 +5,8 @@ import (
 )
 
 const (
-	GroupQueryUriTpl = "block/consistency-groups/%s.json"
-	GroupSearchUri   = "block/consistency-groups/search.json?"
+	queryGroupUriTpl = "block/consistency-groups/%s.json"
+	searchGroupUri   = "block/consistency-groups/search.json?"
 )
 
 type (
@@ -43,7 +43,7 @@ func (this *GroupService) Query() (*Group, error) {
 		return this.Search("name=" + this.name)
 	}
 
-	path := fmt.Sprintf(GroupQueryUriTpl, this.id)
+	path := fmt.Sprintf(queryGroupUriTpl, this.id)
 	group := Group{}
 
 	err := this.get(path, nil, &group)
@@ -55,7 +55,7 @@ func (this *GroupService) Query() (*Group, error) {
 }
 
 func (this *GroupService) Search(query string) (*Group, error) {
-	path := GroupSearchUri + query
+	path := searchGroupUri + query
 
 	res, err := this.Client.Search(path)
 	if err != nil {

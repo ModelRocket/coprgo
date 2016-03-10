@@ -8,11 +8,11 @@ import (
 )
 
 const (
-	CreateVolumeUri   = "block/volumes.json"
-	QueryVolumeUriTpl = "block/volumes/%s.json"
-	SearchVolumeUri   = "block/volumes/search.json?"
-	ListVolumesUri    = "block/volumes/bulk.json"
-	DeleteVolUriTpl   = "block/volumes/%s/deactivate.json"
+	createVolumeUri    = "block/volumes.json"
+	queryVolumeUriTpl  = "block/volumes/%s.json"
+	searchVolumeUri    = "block/volumes/search.json?"
+	listVolumesUri     = "block/volumes/bulk.json"
+	deleteVolumeUriTpl = "block/volumes/%s/deactivate.json"
 )
 
 var (
@@ -52,8 +52,8 @@ type (
 		StoragePool         Resource    `json:"storage_pool"`
 	}
 
-	// CreateVolumeReq represents the json parameters for the create volume REST call
-	CreateVolumeReq struct {
+	// createVolumeReq represents the json parameters for the create volume REST call
+	createVolumeReq struct {
 		ConsistencyGroup string `json:"consistency_group,omitempty"`
 		Count            int    `json:"count"`
 		Name             string `json:"name"`
@@ -63,13 +63,13 @@ type (
 		VPool            string `json:"vpool"`
 	}
 
-	// CreateVolumeRes is the reply from the create volume REST call
-	CreateVolumeRes struct {
+	// createVolumeRes is the reply from the create volume REST call
+	createVolumeRes struct {
 		Task []Task `json:"task"`
 	}
 
-	// ListVolumesRes is the reply to geting a list of volumes
-	ListVolumesRes struct {
+	// listVolumesRes is the reply to geting a list of volumes
+	listVolumesRes struct {
 		Volumes []string `json:"id"`
 	}
 )
@@ -118,7 +118,7 @@ func (this *VolumeService) Project(project string) *VolumeService {
 	return this
 }
 
-// CreateVolume creates a new volume with the specified name using the volume service
+// createVolume creates a new volume with the specified name using the volume service
 func (this *VolumeService) Create(size uint64) (*Volume, error) {
 	sz := float64(size / (1024 * 1024 * 1000))
 
@@ -126,7 +126,7 @@ func (this *VolumeService) Create(size uint64) (*Volume, error) {
 		return nil, err
 	}
 
-	req := CreateVolumeReq{
+	req := createVolumeReq{
 		Count:   1,
 		Name:    this.name,
 		Project: this.project,
@@ -139,9 +139,9 @@ func (this *VolumeService) Create(size uint64) (*Volume, error) {
 		req.ConsistencyGroup = this.group
 	}
 
-	res := CreateVolumeRes{}
+	res := createVolumeRes{}
 
-	err := this.post(CreateVolumeUri, &req, &res)
+	err := this.post(createVolumeUri, &req, &res)
 	if err != nil {
 		if this.LastError().IsCreateVolDup() {
 			return this.Query()
@@ -172,7 +172,7 @@ func (this *VolumeService) Query() (*Volume, error) {
 		return this.Search("name=" + this.name)
 	}
 
-	path := fmt.Sprintf(QueryVolumeUriTpl, this.id)
+	path := fmt.Sprintf(queryVolumeUriTpl, this.id)
 	vol := Volume{}
 
 	err := this.get(path, nil, &vol)
@@ -188,7 +188,7 @@ func (this *VolumeService) Query() (*Volume, error) {
 //    Search("name=foo")
 //
 func (this *VolumeService) Search(query string) (*Volume, error) {
-	path := SearchVolumeUri + query
+	path := searchVolumeUri + query
 
 	res, err := this.Client.Search(path)
 	if err != nil {
@@ -202,9 +202,9 @@ func (this *VolumeService) Search(query string) (*Volume, error) {
 
 func (this *VolumeService) List() ([]string, error) {
 
-	res := ListVolumesRes{}
+	res := listVolumesRes{}
 
-	err := this.get(ListVolumesUri, nil, &res)
+	err := this.get(listVolumesUri, nil, &res)
 	if err != nil {
 		return nil, err
 	}
@@ -212,7 +212,7 @@ func (this *VolumeService) List() ([]string, error) {
 }
 
 func (this *VolumeService) Delete(force bool) error {
-	path := fmt.Sprintf(DeleteVolUriTpl, this.id)
+	path := fmt.Sprintf(deleteVolumeUriTpl, this.id)
 
 	if force {
 		path = path + "?force=true"

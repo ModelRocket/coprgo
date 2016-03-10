@@ -6,12 +6,12 @@ import (
 )
 
 const (
-	CreateExportUri    = "block/exports.json"
-	QueryExportUriTpl  = "block/exports/%s.json"
-	SearchExportUri    = "block/exports/search.json?"
-	DeleteExportUriTpl = "block/exports/%s/deactivate.json"
-
 	ExportTypeExclusive = "Exclusive"
+
+	createExportUri    = "block/exports.json"
+	queryExportUriTpl  = "block/exports/%s.json"
+	searchExportUri    = "block/exports/search.json?"
+	deleteExportUriTpl = "block/exports/%s/deactivate.json"
 )
 
 type (
@@ -36,7 +36,7 @@ type (
 		PathParams    []string        `json:"path_params"`
 	}
 
-	CreateExportReq struct {
+	createExportReq struct {
 		Initiators []string     `json:"initiators"`
 		Name       string       `json:"name"`
 		Project    string       `json:"project"`
@@ -104,7 +104,7 @@ func (this *ExportService) Create() (*Export, error) {
 		return nil, err
 	}
 
-	req := CreateExportReq{
+	req := createExportReq{
 		Name:       this.name,
 		Initiators: this.itrs,
 		Project:    this.project,
@@ -115,7 +115,7 @@ func (this *ExportService) Create() (*Export, error) {
 
 	task := Task{}
 
-	err := this.post(CreateExportUri, &req, &task)
+	err := this.post(createExportUri, &req, &task)
 	if err != nil {
 		if this.LastError().IsExportVolDup() {
 			return this.Query()
@@ -140,7 +140,7 @@ func (this *ExportService) Query() (*Export, error) {
 		return this.Search("name=" + this.name)
 	}
 
-	path := fmt.Sprintf(QueryExportUriTpl, this.id)
+	path := fmt.Sprintf(queryExportUriTpl, this.id)
 	exp := Export{}
 
 	err := this.get(path, nil, &exp)
@@ -152,7 +152,7 @@ func (this *ExportService) Query() (*Export, error) {
 }
 
 func (this *ExportService) Search(query string) (*Export, error) {
-	path := SearchExportUri + query
+	path := searchExportUri + query
 
 	res, err := this.Client.Search(path)
 	if err != nil {
@@ -165,7 +165,7 @@ func (this *ExportService) Search(query string) (*Export, error) {
 }
 
 func (this *ExportService) Delete(id string) error {
-	path := fmt.Sprintf(DeleteExportUriTpl, id)
+	path := fmt.Sprintf(deleteExportUriTpl, id)
 
 	task := Task{}
 

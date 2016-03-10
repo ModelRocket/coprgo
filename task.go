@@ -7,12 +7,12 @@ import (
 )
 
 const (
-	GetTaskUriTpl = "vdc/tasks/%s.json"
-
 	TaskPollDelay              = time.Millisecond * 250
 	TaskStatePending TaskState = "pending"
 	TaskStateError   TaskState = "error"
 	TaskStateReady   TaskState = "ready"
+
+	queryTaskUriTpl = "vdc/tasks/%s.json"
 )
 
 var (
@@ -43,7 +43,7 @@ func (this *Client) Task() *TaskService {
 
 // Query returns the task object
 func (this *TaskService) Query(id string) (Task, error) {
-	path := fmt.Sprintf(GetTaskUriTpl, id)
+	path := fmt.Sprintf(queryTaskUriTpl, id)
 	task := Task{}
 
 	err := this.get(path, nil, &task)

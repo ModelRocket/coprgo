@@ -6,16 +6,16 @@ import (
 )
 
 const (
-	CreateHostUri      = "compute/hosts.json"
-	QueryHostItrUriTpl = "compute/hosts/%s/initiators.json"
-	SearchHostUri      = "compute/hosts/search.json?"
-	QueryHostUriTpl    = "compute/hosts/%s.json"
-
 	HostTypeLinux   HostType = "Linux"
 	HostTypeWindows HostType = "Windows"
 	HostTypeHPUX    HostType = "HPUX"
 	HostTypeEsx     HostType = "Esx"
 	HostTypeOther   HostType = "Other"
+
+	createHostUri      = "compute/hosts.json"
+	queryHostItrUriTpl = "compute/hosts/%s/initiators.json"
+	searchHostUri      = "compute/hosts/search.json?"
+	queryHostUriTpl    = "compute/hosts/%s.json"
 )
 
 type (
@@ -55,7 +55,7 @@ type (
 		Password     string   `json:"password"`
 	}
 
-	QueryHostItrRes struct {
+	queryHostItrRes struct {
 		Initiators []NamedResource `json:"initiator"`
 	}
 
@@ -106,7 +106,7 @@ func (this *HostService) Create(host string) (*Host, error) {
 
 	task := Task{}
 
-	err := this.post(CreateHostUri, &req, &task)
+	err := this.post(createHostUri, &req, &task)
 	if err != nil {
 		if this.LastError().IsCreateHostDup() {
 			return this.Query()
@@ -141,7 +141,7 @@ func (this *HostService) Discover(host, username, password string, port int, ssl
 
 	task := Task{}
 
-	err := this.post(CreateHostUri, &req, &task)
+	err := this.post(createHostUri, &req, &task)
 	if err != nil {
 		if this.LastError().IsCreateHostDup() {
 			return this.Query()
@@ -164,7 +164,7 @@ func (this *HostService) Query() (*Host, error) {
 		return this.Search("name=" + this.name)
 	}
 
-	path := fmt.Sprintf(QueryHostUriTpl, this.id)
+	path := fmt.Sprintf(queryHostUriTpl, this.id)
 	host := Host{}
 
 	err := this.get(path, nil, &host)
@@ -176,7 +176,7 @@ func (this *HostService) Query() (*Host, error) {
 }
 
 func (this *HostService) Search(query string) (*Host, error) {
-	path := SearchHostUri + query
+	path := searchHostUri + query
 
 	res, err := this.Client.Search(path)
 	if err != nil {
@@ -206,8 +206,8 @@ func (this *HostService) Initiators() ([]Initiator, error) {
 		return nil, err
 	}
 
-	path := fmt.Sprintf(QueryHostItrUriTpl, this.id)
-	res := QueryHostItrRes{}
+	path := fmt.Sprintf(queryHostItrUriTpl, this.id)
+	res := queryHostItrRes{}
 	itrs := make([]Initiator, 0)
 
 	err := this.get(path, nil, &res)
