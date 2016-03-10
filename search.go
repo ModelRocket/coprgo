@@ -17,7 +17,7 @@ type (
 func (this *Client) Search(path string) ([]Resource, error) {
 	result := SearchResult{}
 
-	err := this.Get(path, nil, &result)
+	err := this.get(path, nil, &result)
 	if err != nil {
 		return nil, err
 	}

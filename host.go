@@ -106,7 +106,7 @@ func (this *HostService) Create(host string) (*Host, error) {
 
 	task := Task{}
 
-	err := this.Post(CreateHostUri, &req, &task)
+	err := this.post(CreateHostUri, &req, &task)
 	if err != nil {
 		if this.LastError().IsCreateHostDup() {
 			return this.Query()
@@ -141,7 +141,7 @@ func (this *HostService) Discover(host, username, password string, port int, ssl
 
 	task := Task{}
 
-	err := this.Post(CreateHostUri, &req, &task)
+	err := this.post(CreateHostUri, &req, &task)
 	if err != nil {
 		if this.LastError().IsCreateHostDup() {
 			return this.Query()
@@ -167,7 +167,7 @@ func (this *HostService) Query() (*Host, error) {
 	path := fmt.Sprintf(QueryHostUriTpl, this.id)
 	host := Host{}
 
-	err := this.Get(path, nil, &host)
+	err := this.get(path, nil, &host)
 	if err != nil {
 		return nil, err
 	}
@@ -193,7 +193,7 @@ func (this *HostService) Delete(id string) error {
 
 	task := Task{}
 
-	err := this.Post(path, nil, &task)
+	err := this.post(path, nil, &task)
 	if err != nil {
 		return err
 	}
@@ -210,7 +210,7 @@ func (this *HostService) Initiators() ([]Initiator, error) {
 	res := QueryHostItrRes{}
 	itrs := make([]Initiator, 0)
 
-	err := this.Get(path, nil, &res)
+	err := this.get(path, nil, &res)
 	if err != nil {
 		return nil, err
 	}

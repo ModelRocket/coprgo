@@ -115,7 +115,7 @@ func (this *ExportService) Create() (*Export, error) {
 
 	task := Task{}
 
-	err := this.Post(CreateExportUri, &req, &task)
+	err := this.post(CreateExportUri, &req, &task)
 	if err != nil {
 		if this.LastError().IsExportVolDup() {
 			return this.Query()
@@ -143,7 +143,7 @@ func (this *ExportService) Query() (*Export, error) {
 	path := fmt.Sprintf(QueryExportUriTpl, this.id)
 	exp := Export{}
 
-	err := this.Get(path, nil, &exp)
+	err := this.get(path, nil, &exp)
 	if err != nil {
 		return nil, err
 	}
@@ -169,7 +169,7 @@ func (this *ExportService) Delete(id string) error {
 
 	task := Task{}
 
-	err := this.Post(path, nil, &task)
+	err := this.post(path, nil, &task)
 	if err != nil {
 		return err
 	}

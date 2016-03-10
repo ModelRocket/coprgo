@@ -46,7 +46,7 @@ func (this *ProjectService) Query() (*Project, error) {
 	path := fmt.Sprintf(ProjectQueryUriTpl, this.id)
 	proj := Project{}
 
-	err := this.Get(path, nil, &proj)
+	err := this.get(path, nil, &proj)
 	if err != nil {
 		return nil, err
 	}

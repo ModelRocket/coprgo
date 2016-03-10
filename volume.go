@@ -141,7 +141,7 @@ func (this *VolumeService) Create(size uint64) (*Volume, error) {
 
 	res := CreateVolumeRes{}
 
-	err := this.Post(CreateVolumeUri, &req, &res)
+	err := this.post(CreateVolumeUri, &req, &res)
 	if err != nil {
 		if this.LastError().IsCreateVolDup() {
 			return this.Query()
@@ -175,7 +175,7 @@ func (this *VolumeService) Query() (*Volume, error) {
 	path := fmt.Sprintf(QueryVolumeUriTpl, this.id)
 	vol := Volume{}
 
-	err := this.Get(path, nil, &vol)
+	err := this.get(path, nil, &vol)
 	if err != nil {
 		return nil, err
 	}
@@ -204,7 +204,7 @@ func (this *VolumeService) List() ([]string, error) {
 
 	res := ListVolumesRes{}
 
-	err := this.Get(ListVolumesUri, nil, &res)
+	err := this.get(ListVolumesUri, nil, &res)
 	if err != nil {
 		return nil, err
 	}
@@ -220,7 +220,7 @@ func (this *VolumeService) Delete(force bool) error {
 
 	task := Task{}
 
-	err := this.Post(path, nil, &task)
+	err := this.post(path, nil, &task)
 	if err != nil {
 		return err
 	}

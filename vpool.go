@@ -47,7 +47,7 @@ func (this *VPoolService) Query() (*VPool, error) {
 	path := fmt.Sprintf(VPoolQueryUriTpl, this.id)
 	v := VPool{}
 
-	err := this.Get(path, nil, &v)
+	err := this.get(path, nil, &v)
 	if err != nil {
 		return nil, err
 	}

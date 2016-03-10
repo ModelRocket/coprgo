@@ -118,16 +118,22 @@ func (this *Client) Copy() *Client {
 	return &Client{this.s, this.host, this.proxyToken, ApiError{}}
 }
 
+// LastError return the last ApiError
+// If a method returns an error object, you can check this to get more specific details
+func (this *Client) LastError() ApiError {
+	return this.lastError
+}
+
 // PathForResource is a helper method that returns the complete url for a resource
-func (this *Client) PathForResource(r string) string {
+func (this *Client) pathForResource(r string) string {
 	return buildUrl(this.host, r)
 }
 
 // Get performs an http GET using the underlying http client
-func (this *Client) Get(r string, p *url.Values, result interface{}) error {
+func (this *Client) get(r string, p *url.Values, result interface{}) error {
 	this.lastError = ApiError{}
 	e := ApiError{}
-	path := this.PathForResource(r)
+	path := this.pathForResource(r)
 	resp, err := this.s.Get(path, p, result, &e)
 
 	if err != nil {
@@ -145,10 +151,10 @@ func (this *Client) Get(r string, p *url.Values, result interface{}) error {
 }
 
 // Post performs an http POST using the underlying http client
-func (this *Client) Post(r string, p, result interface{}) error {
+func (this *Client) post(r string, p, result interface{}) error {
 	this.lastError = ApiError{}
 	e := ApiError{}
-	path := this.PathForResource(r)
+	path := this.pathForResource(r)
 	resp, err := this.s.Post(path, p, result, &e)
 
 	if err != nil {
@@ -163,12 +169,6 @@ func (this *Client) Post(r string, p, result interface{}) error {
 	}
 
 	return nil
-}
-
-// LastError return the last ApiError
-// If a method returns an error object, you can check this to get more specific details
-func (this *Client) LastError() ApiError {
-	return this.lastError
 }
 
 func buildUrl(host string, path string) string {

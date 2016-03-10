@@ -46,7 +46,7 @@ func (this *GroupService) Query() (*Group, error) {
 	path := fmt.Sprintf(GroupQueryUriTpl, this.id)
 	group := Group{}
 
-	err := this.Get(path, nil, &group)
+	err := this.get(path, nil, &group)
 	if err != nil {
 		return nil, err
 	}

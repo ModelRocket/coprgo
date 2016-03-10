@@ -46,7 +46,7 @@ func (this *TaskService) Query(id string) (Task, error) {
 	path := fmt.Sprintf(GetTaskUriTpl, id)
 	task := Task{}
 
-	err := this.Get(path, nil, &task)
+	err := this.get(path, nil, &task)
 
 	return task, err
 }

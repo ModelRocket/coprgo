@@ -58,7 +58,7 @@ func (this *VArrayService) Query() (*VArray, error) {
 	path := fmt.Sprintf(VArrayQueryUriTpl, this.id)
 	v := VArray{}
 
-	err := this.Get(path, nil, &v)
+	err := this.get(path, nil, &v)
 	if err != nil {
 		return nil, err
 	}

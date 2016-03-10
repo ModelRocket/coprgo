@@ -58,7 +58,7 @@ func (this *InitiatorService) Query() (*Initiator, error) {
 	path := fmt.Sprintf(InitiatorQueryUriTpl, this.id)
 	itr := Initiator{}
 
-	err := this.Get(path, nil, &itr)
+	err := this.get(path, nil, &itr)
 	if err != nil {
 		return nil, err
 	}
