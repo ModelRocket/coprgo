@@ -27,7 +27,7 @@ type (
 	}
 
 	Export struct {
-		BaseObject    `json:",inline"`
+		StorageObject `json:",inline"`
 		Volumes       []ResourceId    `json:"volumes"`
 		Initiators    []Initiator     `json:"initiators"`
 		Hosts         []NamedResource `json:"hosts"`

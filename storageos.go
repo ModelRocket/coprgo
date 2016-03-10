@@ -20,7 +20,7 @@ type (
 		Name     string `json:"name"`
 	}
 
-	BaseObject struct {
+	StorageObject struct {
 		NamedResource `json:",inline"`
 		Inactive      bool     `json:"inactive"`
 		Global        bool     `json:"global"`

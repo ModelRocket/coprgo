@@ -27,7 +27,7 @@ type (
 	}
 
 	VArray struct {
-		BaseObject     `json:",inline"`
+		StorageObject  `json:",inline"`
 		BlockSettings  VArrayBlockSettings  `json:"block_settings"`
 		ObjectSettings VArrayObjectSettings `json:"object_settings"`
 		AutoSanZoning  bool                 `json:"auto_san_zoning"`

@@ -18,7 +18,7 @@ type (
 	}
 
 	Project struct {
-		BaseObject `json:",inline"`
+		StorageObject `json:",inline"`
 	}
 )
 

@@ -18,7 +18,7 @@ type (
 	}
 
 	Group struct {
-		BaseObject `json:",inline"`
+		StorageObject `json:",inline"`
 	}
 )
 

@@ -22,13 +22,13 @@ type (
 	}
 
 	Initiator struct {
-		BaseObject `json:",inline"`
-		Host       Resource      `json:"host"`
-		Protocol   InitiatorType `json:"protocol"`
-		Status     string        `json:"registration_status"`
-		Hostname   string        `json:"hostname"`
-		Node       string        `json:"initiator_node"`
-		Port       string        `json:"initiator_port"`
+		StorageObject `json:",inline"`
+		Host          Resource      `json:"host"`
+		Protocol      InitiatorType `json:"protocol"`
+		Status        string        `json:"registration_status"`
+		Hostname      string        `json:"hostname"`
+		Node          string        `json:"initiator_node"`
+		Port          string        `json:"initiator_port"`
 	}
 
 	InitiatorType string

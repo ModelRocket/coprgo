@@ -33,7 +33,7 @@ type (
 
 	// Volume is a complete coprhd volume object
 	Volume struct {
-		BaseObject          `json:",inline"`
+		StorageObject       `json:",inline"`
 		WWN                 string      `json:"wwn"`
 		Protocols           []string    `json:"protocols"`
 		Protection          interface{} `json:"protection"`

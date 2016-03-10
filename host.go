@@ -29,7 +29,7 @@ type (
 	}
 
 	Host struct {
-		BaseObject         `json:",inline"`
+		StorageObject      `json:",inline"`
 		Type               HostType `json:"type"`
 		OSVersion          string   `json:"os_version,omitempty"`
 		HostName           string   `json:"host_name"`
@@ -186,19 +186,6 @@ func (this *HostService) Search(query string) (*Host, error) {
 	this.id = res[0].Id
 
 	return this.Query()
-}
-
-func (this *HostService) Delete(id string) error {
-	path := fmt.Sprintf(DeleteExportUriTpl, id)
-
-	task := Task{}
-
-	err := this.post(path, nil, &task)
-	if err != nil {
-		return err
-	}
-
-	return this.Task().WaitDone(task.Id, TaskStateReady, time.Second*180)
 }
 
 func (this *HostService) Initiators() ([]Initiator, error) {

@@ -18,8 +18,8 @@ type (
 	}
 
 	VPool struct {
-		BaseObject `json:",inline"`
-		Protocols  []InitiatorType `json:"protocols"`
+		StorageObject `json:",inline"`
+		Protocols     []InitiatorType `json:"protocols"`
 	}
 )
 
