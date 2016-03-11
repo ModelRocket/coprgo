@@ -24,30 +24,35 @@ type (
 		project    string
 		exportType ExportType
 		array      string
-		volumes    []ResourceId
+		volumes    []ExportVolume
 	}
 
 	// Export represents a storage export group
 	Export struct {
 		StorageObject `json:",inline"`
-		Volumes       []ResourceId    `json:"volumes"`
+		Volumes       []ExportVolume  `json:"volumes"`
 		Initiators    []Initiator     `json:"initiators"`
 		Hosts         []NamedResource `json:"hosts"`
 		Clustsers     []NamedResource `json:"clusters"`
 		GeneratedName string          `json:"generated_name"`
-		PathParams    []string        `json:"path_params"`
+		PathParams    []string        `json:"path_parameters"`
 	}
 
 	// ExportType is a string value of the export type
 	ExportType string
 
+	ExportVolume struct {
+		ResourceId `json:",inline"`
+		Lun        int `json:"lun,omitempty"`
+	}
+
 	createExportReq struct {
-		Initiators []string     `json:"initiators"`
-		Name       string       `json:"name"`
-		Project    string       `json:"project"`
-		Type       ExportType   `json:"type"`
-		VArray     string       `json:"varray"`
-		Volumes    []ResourceId `json:"volumes"`
+		Initiators []string       `json:"initiators"`
+		Name       string         `json:"name"`
+		Project    string         `json:"project"`
+		Type       ExportType     `json:"type"`
+		VArray     string         `json:"varray"`
+		Volumes    []ExportVolume `json:"volumes"`
 	}
 )
 
@@ -56,7 +61,7 @@ func (this *Client) Export() *ExportService {
 	return &ExportService{
 		Client:     this.Copy(),
 		itrs:       make([]string, 0),
-		volumes:    make([]ResourceId, 0),
+		volumes:    make([]ExportVolume, 0),
 		exportType: ExportTypeExclusive,
 	}
 }
@@ -80,7 +85,7 @@ func (this *ExportService) Initiators(itrs ...string) *ExportService {
 
 func (this *ExportService) Volumes(vols ...string) *ExportService {
 	for _, v := range vols {
-		this.volumes = append(this.volumes, ResourceId{v})
+		this.volumes = append(this.volumes, ExportVolume{ResourceId{v}, 0})
 	}
 	return this
 }
@@ -120,7 +125,7 @@ func (this *ExportService) Create() (*Export, error) {
 
 	err := this.post(createExportUri, &req, &task)
 	if err != nil {
-		if this.LastError().IsExportVolDup() {
+		if this.LastError().IsDup() {
 			return this.Query()
 		}
 		return nil, err
@@ -167,8 +172,8 @@ func (this *ExportService) Search(query string) (*Export, error) {
 	return this.Query()
 }
 
-func (this *ExportService) Delete(id string) error {
-	path := fmt.Sprintf(deleteExportUriTpl, id)
+func (this *ExportService) Delete() error {
+	path := fmt.Sprintf(deleteExportUriTpl, this.id)
 
 	task := Task{}
 
@@ -220,7 +225,7 @@ func (this *ExportService) getExportUrns() error {
 	this.itrs = itrs
 
 	// Look up the volumes
-	vols := []ResourceId{}
+	vols := []ExportVolume{}
 	for _, v := range this.volumes {
 		if !isStorageOsUrn(v.Id) {
 			vol, err := this.Client.Volume().

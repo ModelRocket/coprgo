@@ -118,7 +118,7 @@ func (this *HostService) Create(host string) (*Host, error) {
 
 	err := this.post(createHostUri, &req, &task)
 	if err != nil {
-		if this.LastError().IsCreateHostDup() {
+		if this.LastError().IsDup() {
 			return this.Query()
 		}
 		return nil, err
@@ -153,7 +153,7 @@ func (this *HostService) Discover(host, username, password string, port int, ssl
 
 	err := this.post(createHostUri, &req, &task)
 	if err != nil {
-		if this.LastError().IsCreateHostDup() {
+		if this.LastError().IsDup() {
 			return this.Query()
 		}
 		return nil, err

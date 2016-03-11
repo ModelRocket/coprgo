@@ -144,7 +144,7 @@ func (this *VolumeService) Create(size uint64) (*Volume, error) {
 
 	err := this.post(createVolumeUri, &req, &res)
 	if err != nil {
-		if this.LastError().IsCreateVolDup() {
+		if this.LastError().IsDup() {
 			return this.Query()
 		}
 		return nil, err
@@ -277,4 +277,10 @@ func (this *VolumeService) getVolumeUrns() error {
 	}
 
 	return nil
+}
+
+func (v Volume) UUID() string {
+	tmp := strings.TrimPrefix(v.Id, "urn:storageos:Volume:")
+	parts := strings.Split(tmp, ":")
+	return parts[0]
 }

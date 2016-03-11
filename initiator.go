@@ -5,8 +5,9 @@ import (
 )
 
 const (
-	InitiatorTypeISCSI InitiatorType = "iSCSI"
-	InitiatorTypeFC    InitiatorType = "FC"
+	InitiatorTypeISCSI   InitiatorType = "iSCSI"
+	InitiatorTypeFC      InitiatorType = "FC"
+	InitiatorTypeScaleIO               = "ScaleIO"
 
 	searchInitiatorUri   = "compute/initiators/search.json?"
 	queryInitiatorUriTpl = "compute/initiators/%s.json"
