@@ -26,6 +26,7 @@ type (
 		*Client
 		id      string
 		name    string
+		wwn     string
 		array   string
 		pool    string
 		group   string
@@ -92,6 +93,11 @@ func (this *VolumeService) Id(id string) *VolumeService {
 // Name sets the volume name for the VolumeService instance
 func (this *VolumeService) Name(name string) *VolumeService {
 	this.name = name
+	return this
+}
+
+func (this *VolumeService) WWN(wwn string) *VolumeService {
+	this.wwn = wwn
 	return this
 }
 
@@ -170,7 +176,10 @@ func (this *VolumeService) Create(size uint64) (*Volume, error) {
 // Query returns the volume object using the specified id
 func (this *VolumeService) Query() (*Volume, error) {
 	if !isStorageOsUrn(this.id) {
-		return this.Search("name=" + this.name)
+		if this.name != "" {
+			return this.Search("name=" + this.name)
+		}
+		return this.Search("wwn=" + this.wwn)
 	}
 
 	path := fmt.Sprintf(queryVolumeUriTpl, this.id)
@@ -214,6 +223,13 @@ func (this *VolumeService) List() ([]string, error) {
 
 // Delete deactivates the volume using the volume service
 func (this *VolumeService) Delete(force bool) error {
+	if this.id == "" {
+		vol, err := this.Query()
+		if err != nil {
+			return err
+		}
+		this.id = vol.Id
+	}
 	path := fmt.Sprintf(deleteVolumeUriTpl, this.id)
 
 	if force {

@@ -133,7 +133,6 @@ func (this *ExportService) Create() (*Export, error) {
 
 	// wait for the task to complete
 	err = this.Task().WaitDone(task.Id, TaskStateReady, time.Second*180)
-
 	if err != nil {
 		return nil, err
 	}

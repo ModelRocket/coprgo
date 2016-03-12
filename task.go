@@ -32,6 +32,7 @@ type (
 		Description string        `json:"description"`
 		Progress    int           `json:"progress"`
 		Resource    NamedResource `json:"resource"`
+		Workflow    Resource      `json:"workflow"`
 	}
 
 	TaskState string
@@ -66,7 +67,11 @@ func (this *TaskService) WaitDone(id string, state TaskState, to time.Duration) 
 			return errors.New(task.Message + ":" + task.Description)
 		}
 
-		if task.State == state {
+		if task.State == state && task.Progress == 100 {
+			if task.Workflow.Id != "" {
+				return this.Workflow().
+					WaitDone(task.Workflow.Id, WorkflowStateSuccess, to)
+			}
 			return nil
 		}
 
